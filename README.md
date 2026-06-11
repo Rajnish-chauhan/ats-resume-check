@@ -1,13 +1,13 @@
-                    # Resume Analyser
+## Resume Analyser
 
 A high-performance web application that leverages artificial intelligence to provide real-time, actionable feedback on resumes based on specific job descriptions.
 
 ## Features
 
-* [cite_start]**AI-Powered Analysis:** Integrated with the Google Gemini AI API to provide intelligent, contextual suggestions for resume improvements[cite: 15].
-* [cite_start]**Real-time Processing:** Utilizes multi-threading and robust Exception Handling to ensure fast, efficient response generation[cite: 15].
-* [cite_start]**Responsive UI:** A modern, clean, and professional interface built with React, JSX, and Tailwind CSS[cite: 16].
-* [cite_start]**Keyword Optimization:** Automates the extraction of key skills from Job Descriptions (JD) and compares them against user resumes to suggest targeted optimizations[cite: 17].
+* **AI-Powered Analysis:** Integrated with the Google Gemini AI API to provide intelligent, contextual suggestions for resume improvements.
+* **Real-time Processing:** Utilizes multi-threading and robust Exception Handling to ensure fast, efficient response generation.
+* **Responsive UI:** A modern, clean, and professional interface built with React, JSX, and Tailwind CSS.
+* **Keyword Optimization:** Automates the extraction of key skills from Job Descriptions (JD) and compares them against user resumes to suggest targeted optimizations.
 
 ## Tech Stack
 
@@ -36,7 +36,7 @@ A high-performance web application that leverages artificial intelligence to pro
 ## Getting Started
 
 ### Prerequisites
-* JDK 21 or higher
+* JDK 17+ or higher
 * React.js & npm
 * API Key for Google Gemini AI
 

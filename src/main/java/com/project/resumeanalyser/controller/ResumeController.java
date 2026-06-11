@@ -1,5 +1,5 @@
 package com.project.resumeanalyser.controller;
-
+import org.springframework.beans.factory.annotation.Value;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.project.resumeanalyser.model.ResumeDocument;
 import com.project.resumeanalyser.repo.ResumeRepository;
@@ -23,14 +23,16 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/resume")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "https://ats.rajnishsystems.in"})
+@CrossOrigin(origins = "${app.redirect.target-url}") // 2. Cleaned up array brackets
 public class ResumeController {
+
+    // This will now correctly pull from application-test.properties or application-prod.properties
+    @Value("${app.redirect.target-url}")
+    private String redirectTargetUrl;
 
     private final ChatClient chatClient;
     private final Tika tika = new Tika();
     private final ResumeRepository resumeRepository;
-
-    // 1. Inject GridFsTemplate
     private final GridFsTemplate gridFsTemplate;
 
     public ResumeController(ChatModel chatModel, ResumeRepository resumeRepository, GridFsTemplate gridFsTemplate) {
@@ -38,17 +40,15 @@ public class ResumeController {
         this.resumeRepository = resumeRepository;
         this.gridFsTemplate = gridFsTemplate;
     }
+
     @GetMapping("/all")
     public List<ResumeDocument> getAllUploadedResumes() {
-        // Fetch all documents from the 'analyzed_resumes' collection
         return resumeRepository.findAll();
     }
 
-    // ENDPOINT 2: Stream the actual PDF to the screen
     @GetMapping("/view/{gridFsId}")
     public ResponseEntity<byte[]> viewResumePdf(@PathVariable String gridFsId) {
         try {
-            // Find the file chunks in GridFS using the ID
             GridFSFile gridFSFile = gridFsTemplate.findOne(
                     new Query(Criteria.where("_id").is(gridFsId))
             );
@@ -57,16 +57,13 @@ public class ResumeController {
                 return ResponseEntity.notFound().build();
             }
 
-            // Reconstruct the physical bytes from the chunks
             GridFsResource resource = gridFsTemplate.getResource(gridFSFile);
             byte[] fileBytes = resource.getContentAsByteArray();
 
-            // Determine content type (default to PDF if unknown)
             String contentType = gridFSFile.getMetadata() != null && gridFSFile.getMetadata().getString("_contentType") != null
                     ? gridFSFile.getMetadata().getString("_contentType")
                     : MediaType.APPLICATION_PDF_VALUE;
 
-            // Send it back to the browser to be viewed inline
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + gridFSFile.getFilename() + "\"")
@@ -84,12 +81,10 @@ public class ResumeController {
             @RequestParam("jd") String jobDescription) {
 
         try {
-            // Keep the bytes safe early
             byte[] fileBytes = file.getBytes();
             String originalFileName = file.getOriginalFilename();
             String contentType = file.getContentType();
 
-            // Extract text
             String resumeText = tika.parseToString(new ByteArrayInputStream(fileBytes));
 
             if (resumeText.length() > 5000) {
@@ -110,7 +105,6 @@ public class ResumeController {
                     Keep the response strictly valid JSON without markdown formatting.
                     """.formatted(resumeText, jobDescription);
 
-            // AI Call
             String aiResponse = chatClient.prompt()
                     .user(prompt)
                     .call()
@@ -118,22 +112,18 @@ public class ResumeController {
 
             String cleanJson = aiResponse.replace("```json", "").replace("```", "").trim();
 
-            // --- THE FIX: SAVE FILE TO GRIDFS INSTEAD OF STANDARD COLLECTION ---
-
-            // 1. Store the actual file bytes safely via GridFS
             ObjectId gridFsId = gridFsTemplate.store(
                     new ByteArrayInputStream(fileBytes),
                     originalFileName,
                     contentType
             );
 
-            // 2. Save the metadata and link the GridFS ID
             ResumeDocument doc = new ResumeDocument();
             doc.setJobDescription(jobDescription);
             doc.setFileName(originalFileName);
             doc.setFileType(contentType);
             doc.setAiReport(cleanJson);
-            doc.setGridFsFileId(gridFsId.toString()); // Save the reference!
+            doc.setGridFsFileId(gridFsId.toString());
 
             resumeRepository.save(doc);
 
