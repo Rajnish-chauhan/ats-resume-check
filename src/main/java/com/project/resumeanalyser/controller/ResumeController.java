@@ -96,7 +96,8 @@ public class ResumeController {
                     ----
                     %s
                     ----
-                    Job Description: 
+                    Job Description
+                    ----
                     %s
                     ----
                     Return a structured JSON with exactly these keys:
