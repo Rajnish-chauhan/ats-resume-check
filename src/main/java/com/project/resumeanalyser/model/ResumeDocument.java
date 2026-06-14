@@ -9,14 +9,9 @@ public class ResumeDocument {
     private String id;
     private String jobDescription;
     private String aiReport;
-
     private String fileName;
     private String fileType;
-
-    // NEW: Instead of byte[], we store the ID of the file in GridFS
     private String gridFsFileId;
-
-    // --- Getters and Setters ---
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getJobDescription() { return jobDescription; }
