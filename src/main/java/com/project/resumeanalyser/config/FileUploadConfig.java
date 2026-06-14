@@ -20,7 +20,7 @@ public class FileUploadConfig extends AbstractMongoClientConfiguration {
 
     @Override
     public MongoClient mongoClient() {
-        // Now it uses the secure variable instead of a hardcoded string
+        //Now it uses the secure variable instead of a hardcoded string
         return MongoClients.create(mongoUri);
     }
 }
