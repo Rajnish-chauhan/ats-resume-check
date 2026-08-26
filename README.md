@@ -101,6 +101,10 @@ Action: Retrieves the specific details, score, and suggestions of a past analysi
 * API Key for Google Gemini AI
 
 ### Backend Setup
+* Clone Repo
+```text
+git clone https://github.com/Rajnish-chauhan/ats-resume-check
+```
 * Navigate to the backend project root.
 * Open application.properties and configure your database and API credentials
 * Build and run the application:
