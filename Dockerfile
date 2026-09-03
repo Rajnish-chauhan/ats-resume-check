@@ -10,5 +10,5 @@ FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 # Build stage se sirf JAR file uthao
 COPY --from=build /target/*.jar app.jar
-EXPOSE 8080
+EXPOSE 8084
 ENTRYPOINT ["java", "-jar", "app.jar"]
