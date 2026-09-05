@@ -1,12 +1,24 @@
 ## Resume Analyser
 
 An intelligent, full-stack web application designed to evaluate candidate resumes against specific Job Descriptions (JDs). By leveraging Google's Gemini AI, the system automatically extracts text, analyzes keyword matches, provides actionable improvement suggestions, and assigns an overall compatibility score.
+
+![Home Screen](images/Home.png)
+
 ## Features
 
 * **AI-Powered Analysis:** Integrated with the Google Gemini AI API to provide intelligent, contextual suggestions for resume improvements.
+
+  ![Key Issues](images/issues.png)
+  <br>
+  ![Suggestions to Improve](images/Suggestions.png)
+
 * **Real-time Processing:** Utilizes multi-threading and robust Exception Handling to ensure fast, efficient response generation.
 * **Responsive UI:** A modern, clean, and professional interface built with React, JSX, and Tailwind CSS.
 * **Keyword Optimization:** Automates the extraction of key skills from Job Descriptions (JD) and compares them against user resumes to suggest targeted optimizations.
+
+  ![Matched Keywords](images/MatchcedKeywords.png)
+  <br>
+  ![Missing Keywords](images/MissingKeyword.png)
 
 ## Tech Stack
 
@@ -28,16 +40,21 @@ An intelligent, full-stack web application designed to evaluate candidate resume
 * Git & GitHub (Version Control)
 
 ## How It Works
-* Document Upload: The user navigates to the UploadForm.jsx component and submits their resume file along with a text Job Description.
+* **Document Upload:** The user navigates to the UploadForm.jsx component and submits their resume file along with a text Job Description.
 
-* File Processing: The backend ResumeController receives the multipart request. FileUploadConfig ensures size limits are respected. The text is extracted from the document.
+  ![Job Description Input](images/JD.png)
 
-* AI Inference: The backend constructs a prompt combining the extracted resume text and the JD. This is sent to the Gemini API, requesting a structured JSON response containing the score and suggestions.
+* **File Processing:** The backend ResumeController receives the multipart request. FileUploadConfig ensures size limits are respected. The text is extracted from the document.
 
-* Data Persistence: The response from Gemini is mapped to the ResumeDocument model and saved in MongoDB using the repository layer.
+* **AI Inference:** The backend constructs a prompt combining the extracted resume text and the JD. This is sent to the Gemini API, requesting a structured JSON response containing the score and suggestions.
 
-* Result Display: The frontend receives the JSON response and dynamically renders the score and feedback in the ResultsBoard.jsx.
+  ![Analyzing Process](images/Analysing.png)
 
+* **Data Persistence:** The response from Gemini is mapped to the ResumeDocument model and saved in MongoDB using the repository layer.
+
+* **Result Display:** The frontend receives the JSON response and dynamically renders the score and feedback in the ResultsBoard.jsx.
+
+  ![ATS Analysis Summary](images/summary.png)
 ## 📂 Project Structure
 ### Backend Structure
 ```text
