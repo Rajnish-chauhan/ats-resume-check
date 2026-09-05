@@ -58,41 +58,54 @@ An intelligent, full-stack web application designed to evaluate candidate resume
 ## 📂 Project Structure
 ### Backend Structure
 ```text
-src
-└── main
-    ├── java
-    │   └── com.project.resumeanalyser
-    │       ├── config
-    │       │   └── FileUploadConfig.java
-    │       ├── controller
-    │       │   └── ResumeController.java
-    │       ├── model
-    │       │   └── ResumeDocument.java
-    │       ├── repo
-    │       │   └── (Repository Interfaces)
-    │       └── ResumeAnalyserApplication.java
-    └── resources
-        ├── static
-        ├── templates
-        ├── application.properties
-        ├── application-prod.properties
-        └── application-test.properties
+ResumeAnalyser
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   └── com.project.resumeanalyser
+│   │   │       ├── config
+│   │   │       │   └── FileUploadConfig.java
+│   │   │       ├── controller
+│   │   │       │   └── ResumeController.java
+│   │   │       ├── dto
+│   │   │       │   └── FileDownloadDto.java
+│   │   │       ├── model
+│   │   │       │   └── ResumeDocument.java
+│   │   │       ├── repo
+│   │   │       │   └── ResumeRepository.java
+│   │   │       ├── service
+│   │   │       │   ├── ResumeService.java
+│   │   │       │   └── ResumeServiceImpl.java
+│   │   │       └── ResumeAnalyserApplication.java
+│   │   └── resources
+│   └── test
+├── images
+└── target
 ```
 ### Frontend Structure
 ```text
-src
-├── assets
-├── components
-│   ├── AdminDashboard.jsx
-│   ├── api.jsx
-│   ├── Footer.jsx
-│   ├── Header.jsx
-│   ├── Layout.jsx
-│   ├── ResultsBoard.jsx
-│   └── UploadForm.jsx
-├── App.jsx
-├── index.css
-└── main.jsx
+frontend
+├── public
+├── src
+│   ├── api
+│   │   └── adminApi.jsx
+│   ├── components
+│   │   ├── AdminDashboard.jsx
+│   │   ├── Footer.jsx
+│   │   ├── Header.jsx
+│   │   ├── Layout.jsx
+│   │   ├── ResultsBoard.jsx
+│   │   └── UploadForm.jsx
+│   ├── pages
+│   │   └── Home.jsx
+│   ├── App.jsx
+│   ├── index.css
+│   └── main.jsx
+├── .env.development
+├── .env.production
+├── eslint.config.js
+├── index.html
+└── package-lock.json
 ```
 ### API Endpoints
 * All backend endpoints are prefixed with ``@RequestMapping("/api/resume").``
