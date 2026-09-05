@@ -160,12 +160,11 @@ VITE_API_BASE_URL=http://localhost:8080/api/resume
 npm run dev
 ```
 ---
-# 🤝 Let's Connect
 
-**Rajnish Chauhan** | Backend Software Engineer
+## 🤝 Let's Connect
 
-*Engineered with a focus on scalable backend system design, clean code principles, and seamless third-party service integration.*
+**Rajnish Chauhan** | **Backend Software Engineer**
 
-I am a Backend Developer passionate about building scalable APIs and robust backend systems using Java and Spring Boot. Check out my other projects or get in touch!
+I am a **Backend Developer** passionate about building scalable **APIs** and robust backend systems using **Java** and **Spring Boot**. Check out my other projects or get in touch!
 
 **🌐 Portfolio:** [rajnishsystems.in](https://rajnishsystems.in)
