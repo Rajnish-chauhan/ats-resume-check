@@ -68,17 +68,17 @@ public class ResumeServiceImpl implements ResumeService {
         String originalFileName = file.getOriginalFilename();
         String contentType = file.getContentType();
 
-        // Extract textual content via Apache Tika parser
+        // Extract full resume content using Apache Tika
         String resumeText = tika.parseToString(new ByteArrayInputStream(fileBytes));
 
-        // Preserve up to 20000 characters for multi-page analysis without token exhaustion
+        // Enforce safety cap on character length to handle multi-page resumes within model budget
         if (resumeText.length() > 20000) {
             resumeText = resumeText.substring(0, 20000);
         }
 
-        // Professional ATS Evaluation Prompt
+        // Objective corporate ATS evaluator instructions
         String systemInstructions = """
-                You are a principal technical recruiter and corporate ATS (Applicant Tracking System) auditing engine.
+                You are a principal technical recruiter and corporate ATS (Applicant Tracking System) auditing engine for ScoreMyCV.
                 Evaluate the candidate's resume strictly against the provided Job Description (JD).
                 
                 Provide an objective, highly actionable, and professional evaluation.
@@ -122,7 +122,7 @@ public class ResumeServiceImpl implements ResumeService {
                 .call()
                 .content();
 
-        // Sanitize code fence wrappers if emitted by the LLM
+        // Clean any potential markdown wrapping
         String cleanJson = aiResponse.trim();
         if (cleanJson.startsWith("```json")) {
             cleanJson = cleanJson.substring(7);
@@ -135,14 +135,14 @@ public class ResumeServiceImpl implements ResumeService {
         }
         cleanJson = cleanJson.trim();
 
-        // Store original uploaded binary in GridFS
+        // Store file in GridFS
         ObjectId gridFsId = gridFsTemplate.store(
                 new ByteArrayInputStream(fileBytes),
                 originalFileName,
                 contentType
         );
 
-        // Persist audit record in MongoDB
+        // Save analysis document in MongoDB
         ResumeDocument doc = new ResumeDocument();
         doc.setJobDescription(jobDescription);
         doc.setFileName(originalFileName);

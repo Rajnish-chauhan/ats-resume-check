@@ -2,6 +2,7 @@ package com.project.resumeanalyser.controller;
 
 import com.project.resumeanalyser.dto.FileDownloadDto;
 import com.project.resumeanalyser.model.ResumeDocument;
+import com.project.resumeanalyser.service.AuthService;
 import com.project.resumeanalyser.service.ResumeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +22,11 @@ public class ResumeController {
 
     private static final Logger log = LoggerFactory.getLogger(ResumeController.class);
     private final ResumeService resumeService;
+    private final AuthService authService;
 
-    public ResumeController(ResumeService resumeService) {
+    public ResumeController(ResumeService resumeService, AuthService authService) {
         this.resumeService = resumeService;
+        this.authService = authService;
     }
 
     @GetMapping("/health")
@@ -31,8 +34,22 @@ public class ResumeController {
         return ResponseEntity.ok(Map.of("status", "UP", "service", "ScoreMyCV Engine"));
     }
 
+    // Secured: Requires valid Bearer authorization token
     @GetMapping("/all")
-    public ResponseEntity<List<ResumeDocument>> getAllUploadedResumes() {
+    public ResponseEntity<?> getAllUploadedResumes(
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Access denied. Valid Bearer token required."));
+        }
+
+        String token = authHeader.substring(7);
+        if (!authService.isTokenValid(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Session expired or invalid token. Please log in again."));
+        }
+
         return ResponseEntity.ok(resumeService.getAllUploadedResumes());
     }
 
@@ -56,6 +73,7 @@ public class ResumeController {
         }
     }
 
+    // Public endpoint for resume submissions
     @PostMapping("/analyseAts")
     public ResponseEntity<?> analyseAts(
             @RequestParam("file") MultipartFile file,

@@ -42,13 +42,15 @@ jobs:
             docker stop scoremycv-backend || true
             docker rm scoremycv-backend || true
 
-            echo "Starting new ScoreMyCV container on host port 8082..."
+            echo "Starting new ScoreMyCV container with secure GitHub Secrets on port 8082..."
             docker run -d --name scoremycv-backend --restart unless-stopped \
               -p 8082:8080 \
               -e MONGO_ATLAS_STRING="${{ secrets.MONGO_ATLAS_STRING }}" \
               -e OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
-              -e FRONTEND_URL="https://analyse.rajnishsystems.rajnshsystems.in,https://analyse.rajnishsystems.in" \
+              -e FRONTEND_URL="https://ats.rajnishsystems.in,https://analyse.rajnishsystems.in" \
+              -e ADMIN_USERNAME="${{ secrets.ADMIN_USERNAME }}" \
+              -e ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}" \
               ${{ secrets.DOCKERHUB_USERNAME }}/scoremycv-backend:latest
 
-            echo "Deployment completed successfully. Cleaning up dangling images..."
+            echo "Deployment completed successfully. Pruning dangling images..."
             docker image prune -f

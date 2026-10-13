@@ -9,8 +9,7 @@ public class WebCorsConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // allowedOriginPatterns("*") dynamically echoes the caller's origin
-        // This works seamlessly for localhost:5173, localhost:3000, and production domains
+        // Dynamic origin reflection allows seamless requests across localhost and production domains
         registry.addMapping("/**")
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
