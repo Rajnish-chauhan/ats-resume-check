@@ -6,6 +6,8 @@ import com.project.resumeanalyser.model.ResumeDocument;
 import com.project.resumeanalyser.repo.ResumeRepository;
 import org.apache.tika.Tika;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -22,6 +24,8 @@ import java.util.Map;
 
 @Service
 public class ResumeServiceImpl implements ResumeService {
+
+    private static final Logger log = LoggerFactory.getLogger(ResumeServiceImpl.class);
 
     private final ChatClient chatClient;
     private final Tika tika;
@@ -45,7 +49,7 @@ public class ResumeServiceImpl implements ResumeService {
         GridFSFile gridFSFile = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(gridFsId)));
 
         if (gridFSFile == null) {
-            return null; // The controller will handle sending the 404
+            return null;
         }
 
         GridFsResource resource = gridFsTemplate.getResource(gridFSFile);
@@ -64,43 +68,81 @@ public class ResumeServiceImpl implements ResumeService {
         String originalFileName = file.getOriginalFilename();
         String contentType = file.getContentType();
 
-        // 1. Extract Text
+        // Extract textual content via Apache Tika parser
         String resumeText = tika.parseToString(new ByteArrayInputStream(fileBytes));
-        if (resumeText.length() > 5000) {
-            resumeText = resumeText.substring(0, 5000);
+
+        // Preserve up to 20000 characters for multi-page analysis without token exhaustion
+        if (resumeText.length() > 20000) {
+            resumeText = resumeText.substring(0, 20000);
         }
 
-        // 2. AI Prompt Generation
-        String prompt = """
-                You are an expert ATS (Applicant Tracking System) analyser. Compare the following resume with the Job Description.
-                ----
-                %s
-                ----
-                Job Description
-                ----
-                %s
-                ----
-                Return a structured JSON with exactly these keys:
-                {"atsScore": 0, "matchedKeyword": [], "missingKeywords": [], "summary": "","issue":"","suggestion":""}
+        // Professional ATS Evaluation Prompt
+        String systemInstructions = """
+                You are a principal technical recruiter and corporate ATS (Applicant Tracking System) auditing engine.
+                Evaluate the candidate's resume strictly against the provided Job Description (JD).
                 
-                Keep the response strictly valid JSON without markdown formatting.
+                Provide an objective, highly actionable, and professional evaluation.
+                
+                You MUST return only a valid JSON object matching the exact schema below:
+                {
+                  "atsScore": <integer 0-100>,
+                  "matchLevel": "<High Match | Moderate Match | Low Match>",
+                  "scoreBreakdown": {
+                    "skillsMatch": <integer 0-100>,
+                    "experienceRelevance": <integer 0-100>,
+                    "formattingAndStructure": <integer 0-100>
+                  },
+                  "executiveSummary": "<2-3 sentence executive evaluation summarizing strengths and critical alignment>",
+                  "matchedSkills": ["skill1", "skill2"],
+                  "missingSkills": [
+                    { "skill": "skill name", "importance": "Critical | Preferred" }
+                  ],
+                  "criticalIssues": [
+                    "<specific issue found, e.g., missing metrics, lack of cloud experience, poor section headers>"
+                  ],
+                  "actionableRecommendations": [
+                    "<concrete step candidate must take to improve ATS pass rate and impact>"
+                  ]
+                }
+                
+                Do not include markdown code block formatting (such as ```json or ```). Return the raw JSON string only.
+                """;
+
+        String userPrompt = """
+                RESUME CONTENT:
+                %s
+                
+                TARGET JOB DESCRIPTION:
+                %s
                 """.formatted(resumeText, jobDescription);
 
         String aiResponse = chatClient.prompt()
-                .user(prompt)
+                .system(systemInstructions)
+                .user(userPrompt)
                 .call()
                 .content();
 
-        String cleanJson = aiResponse.replace("```json", "").replace("```", "").trim();
+        // Sanitize code fence wrappers if emitted by the LLM
+        String cleanJson = aiResponse.trim();
+        if (cleanJson.startsWith("```json")) {
+            cleanJson = cleanJson.substring(7);
+        }
+        if (cleanJson.startsWith("```")) {
+            cleanJson = cleanJson.substring(3);
+        }
+        if (cleanJson.endsWith("```")) {
+            cleanJson = cleanJson.substring(0, cleanJson.length() - 3);
+        }
+        cleanJson = cleanJson.trim();
 
-        // 3. Store File in GridFS
+        // Store original uploaded binary in GridFS
         ObjectId gridFsId = gridFsTemplate.store(
                 new ByteArrayInputStream(fileBytes),
                 originalFileName,
                 contentType
         );
 
-        // 4. Save to Repository
+        // Persist audit record in MongoDB
         ResumeDocument doc = new ResumeDocument();
         doc.setJobDescription(jobDescription);
         doc.setFileName(originalFileName);

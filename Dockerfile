@@ -1,14 +1,14 @@
-# Step 1: Build stage (Maven + JDK 21)
-# maven:3.9.6-eclipse-temurin-21 lightweight aur stable hai
+# Stage 1: Build JAR package
 FROM maven:3.9.6-eclipse-temurin-21 AS build
-COPY . .
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Step 2: Run stage (Lightweight Alpine image)
-# eclipse-temurin:21-jdk-alpine sabse best lightweight runtime hai
-FROM eclipse-temurin:21-jdk-alpine
+# Stage 2: Production JRE runtime
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-# Build stage se sirf JAR file uthao
-COPY --from=build /target/*.jar app.jar
-EXPOSE 8084
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

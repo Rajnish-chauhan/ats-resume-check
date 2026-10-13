@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 @Configuration
 public class FileUploadConfig extends AbstractMongoClientConfiguration {
 
-    // This grabs the string directly from your application.properties!
     @Value("${spring.data.mongodb.uri}")
     private String mongoUri;
 
@@ -20,7 +19,6 @@ public class FileUploadConfig extends AbstractMongoClientConfiguration {
 
     @Override
     public MongoClient mongoClient() {
-        //Now it uses the secure variable instead of a hardcoded string
         return MongoClients.create(mongoUri);
     }
 }
