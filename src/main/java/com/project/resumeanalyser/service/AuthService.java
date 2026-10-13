@@ -10,20 +10,24 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class AuthService {
 
-    @Value("${app.admin.username}")
-    private String adminUsername;
+    private final String adminUsername;
+    private final String adminPassword;
 
-    @Value("${app.admin.password}")
-    private String adminPassword;
-
-    // Session cache with 24-hour expiration
+    // Active session store: Token -> Expiry Timestamp (24 hours validity)
     private final Map<String, Long> activeSessions = new ConcurrentHashMap<>();
     private static final long SESSION_LIFETIME_MS = 24 * 60 * 60 * 1000L;
 
+    public AuthService(
+            @Value("${app.admin.username:${ADMIN_USERNAME}}") String adminUsername,
+            @Value("${app.admin.password:${ADMIN_PASSWORD}}") String adminPassword) {
+        this.adminUsername = adminUsername;
+        this.adminPassword = adminPassword;
+    }
+
     public String authenticate(String username, String password) {
         if (username != null && password != null &&
-                username.trim().equals(adminUsername.trim()) &&
-                password.trim().equals(adminPassword.trim())) {
+                username.trim().equals(this.adminUsername.trim()) &&
+                password.trim().equals(this.adminPassword.trim())) {
 
             String token = UUID.randomUUID().toString();
             activeSessions.put(token, System.currentTimeMillis() + SESSION_LIFETIME_MS);

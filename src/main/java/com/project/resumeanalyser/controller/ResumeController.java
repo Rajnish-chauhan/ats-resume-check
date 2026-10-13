@@ -34,14 +34,14 @@ public class ResumeController {
         return ResponseEntity.ok(Map.of("status", "UP", "service", "ScoreMyCV Engine"));
     }
 
-    // Secured: Requires valid Bearer authorization token
+    // Secured endpoint: Valid Bearer token required
     @GetMapping("/all")
     public ResponseEntity<?> getAllUploadedResumes(
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Access denied. Valid Bearer token required."));
+                    .body(Map.of("error", "Access denied. Bearer token required."));
         }
 
         String token = authHeader.substring(7);
@@ -73,7 +73,6 @@ public class ResumeController {
         }
     }
 
-    // Public endpoint for resume submissions
     @PostMapping("/analyseAts")
     public ResponseEntity<?> analyseAts(
             @RequestParam("file") MultipartFile file,
