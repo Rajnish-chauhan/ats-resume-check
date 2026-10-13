@@ -34,7 +34,7 @@ public class ResumeController {
         return ResponseEntity.ok(Map.of("status", "UP", "service", "ScoreMyCV Engine"));
     }
 
-    // Secured endpoint: Valid Bearer token required
+    // Secured: Requires valid Bearer authorization token
     @GetMapping("/all")
     public ResponseEntity<?> getAllUploadedResumes(
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
@@ -73,6 +73,7 @@ public class ResumeController {
         }
     }
 
+    // Public endpoint for candidate resume analysis
     @PostMapping("/analyseAts")
     public ResponseEntity<?> analyseAts(
             @RequestParam("file") MultipartFile file,

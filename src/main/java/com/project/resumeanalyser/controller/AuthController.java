@@ -3,6 +3,8 @@ package com.project.resumeanalyser.controller;
 import com.project.resumeanalyser.dto.LoginRequest;
 import com.project.resumeanalyser.dto.LoginResponse;
 import com.project.resumeanalyser.service.AuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -19,6 +22,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        if (request == null || request.username() == null || request.password() == null) {
+            return ResponseEntity.badRequest()
+                    .body(new LoginResponse(false, null, "Username and password cannot be empty."));
+        }
+
+        log.info("[AuthController] Login request received for user: {}", request.username());
         String token = authService.authenticate(request.username(), request.password());
 
         if (token != null) {
